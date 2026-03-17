@@ -1,0 +1,21 @@
+# Levven integration services
+set_entity_type:
+  name: Set entity type
+  description: Set a configurable Levven device (e.g. CP2-4-5) to appear as a light or switch. Reload the integration for changes to take effect.
+  fields:
+    entity_id:
+      required: true
+      description: The Levven entity to configure (e.g. light.levven_light_abc123)
+      selector:
+        entity:
+          integration: levven
+    entity_type:
+      required: true
+      description: "Entity type: light or switch"
+      selector:
+        select:
+          options:
+            - label: Light
+              value: light
+            - label: Switch
+              value: switch

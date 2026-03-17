@@ -1,0 +1,18 @@
+{
+  "domain": "levven",
+  "name": "Levven",
+  "version": "1.0.0",
+  "documentation": "https://github.com/levven-com/home-assistant-levven",
+  "issue_tracker": "https://github.com/levven-com/home-assistant-levven/issues",
+  "dependencies": [
+    "mqtt",
+    "zeroconf"
+  ],
+  "codeowners": [
+    "@jvsinclair"
+  ],
+  "requirements": [],
+  "iot_class": "local_polling",
+  "config_flow": true,
+  "icon": "/api/levven_brand/icon.png"
+}

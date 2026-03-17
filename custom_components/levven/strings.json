@@ -1,0 +1,50 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Levven Gateway Setup",
+        "description": "Configure your Levven Gateway connection via MQTT",
+        "data": {
+          "host": "MQTT Broker Host",
+          "port": "MQTT Broker Port",
+          "username": "MQTT Username (optional)",
+          "password": "MQTT Password (optional)",
+          "use_tls": "Use TLS",
+          "include_transmitters": "Include Transmitters as entities",
+          "include_transmitters_as_entities": "Include Transmitters as entities"
+        }
+      },
+      "configure_device": {
+        "title": "Configure Levven Device",
+        "description": "A new Levven device has been discovered. Please configure it below.",
+        "data": {
+          "name": "Device Name",
+          "entity_type": "Entity Type"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Levven Options",
+        "data": {
+          "include_transmitters": "Include Transmitters as entities",
+          "include_transmitters_as_entities": "Include Transmitters as entities"
+        }
+      }
+    }
+  },
+  "error": {
+    "cannot_connect": "Unable to connect to the gateway. Please check your MQTT broker configuration and ensure the gateway is connected.",
+    "invalid_auth": "Invalid gateway response. Please verify your gateway is properly configured and connected to the MQTT broker.",
+    "unknown": "Unexpected error occurred"
+  },
+  "abort": {
+    "already_configured": "This gateway is already configured",
+    "already_configured_device": "This device is already configured",
+    "invalid_discovery_info": "Invalid device discovery information",
+    "coordinator_not_found": "Integration coordinator not found",
+    "device_configured": "Device has been configured successfully"
+  }
+}
