@@ -4,7 +4,7 @@ Home Assistant integration for Levven Gateway devices, maintained in the `levven
 
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
 [![GitHub release](https://img.shields.io/github/v/release/levven-com/home-assistant-levven)](https://github.com/levven-com/home-assistant-levven/releases)
-[![License](https://github.com/levven-com/home-assistant-levven/blob/main/LICENSE)](LICENSE)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 [![GitHub stars](https://img.shields.io/github/stars/levven-com/home-assistant-levven)](https://github.com/levven-com/home-assistant-levven/stargazers)
 
 This integration enables Home Assistant to control and monitor Levven devices via the Levven Gateway using MQTT.
