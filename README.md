@@ -1,17 +1,17 @@
 # Levven Home Assistant Integration
 
-Home Assistant integration for Levven Gateway devices, maintained in the `levven-com/home-assistant-levven` repository (developed by `@jvsinclair`).
+Home Assistant integration for Levven devices connected through a Levven Q Gateway, maintained in the `levven-com/home-assistant-levven` repository (developed by `@jvsinclair`).
 
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
 [![GitHub release](https://img.shields.io/github/v/release/levven-com/home-assistant-levven)](https://github.com/levven-com/home-assistant-levven/releases)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 [![GitHub stars](https://img.shields.io/github/stars/levven-com/home-assistant-levven)](https://github.com/levven-com/home-assistant-levven/stargazers)
 
-This integration enables Home Assistant to control and monitor Levven devices via the Levven Gateway using MQTT.
+This integration enables Home Assistant to control and monitor Levven devices via the Levven Q Gateway using MQTT.
 
 ## Features
 
-- **Automatic Device Discovery**: Automatically discovers all receivers (controllers) connected to your Levven Gateway
+- **Automatic Device Discovery**: Automatically discovers all receivers (controllers) connected to your Levven Q Gateway
 - **Light Control**: Full support for dimmable lights with brightness control (Levven level 0-65535 mapped to HA brightness 0-255)
 - **Switch Control**: Support for on/off switches and outlets
 - **Real-time Updates**: State changes are reflected immediately via MQTT notifications
@@ -29,52 +29,19 @@ Before installing the integration in Home Assistant, it is **strongly recommende
 
 While renaming is supported on the Home Assistant side, doing most of your naming in the Levven app first reduces the chance of name/ID churn that can affect automations and other features in Home Assistant.
 
-### HACS (when published)
+### HACS
 
-Once this repository is added to the public HACS default or as a documented custom repository, installation will look like:
+This integration can be installed through HACS as a custom repository:
 
 1. Open HACS in Home Assistant.
-2. Go to Integrations.
+2. Go to **Integrations**.
 3. Click the three dots menu and select **Custom repositories**.
 4. Add this repository URL: `https://github.com/levven-com/home-assistant-levven`.
 5. Set the category to **Integration** and add.
 6. Search for **Levven** in HACS and install it.
 7. Restart Home Assistant.
-
-### Local / Development Testing (current workflow)
-
-Because this repository is not yet a public HACS integration, you can test it locally in two main ways.  
-These instructions apply to:
-
-- **Home Assistant OS** (and Supervised): config directory is `/config`.
-- **Home Assistant Core** (venv/docker on your own host): config directory is typically `~/.homeassistant` or whatever you configured as the Home Assistant config path.
-
-#### Option 1: Manual install into your Home Assistant config
-
-1. On the machine where Home Assistant is running, locate your configuration directory:
-   - Home Assistant OS / Supervised: usually `/config`
-   - Home Assistant Core: usually `~/.homeassistant`
-2. Ensure the `custom_components` folder exists inside your config directory; create it if it does not.
-3. From a terminal on that machine, clone or copy this repository into your config directory (not into another nested repo), so that the path looks like:
-   - `<config>/custom_components/levven/manifest.json`
-   - `<config>/custom_components/levven/__init__.py`
-   - etc.
-4. Restart Home Assistant.
-5. In Home Assistant, go to **Settings → Devices & Services → Add Integration**.
-6. Search for **Levven** and follow the setup instructions.
-
-You can repeat steps 3–4 whenever you update this repository’s code: re-copy/`git pull` into `<config>/custom_components/levven`, then restart Home Assistant.
-
-#### Option 2: HACS custom repository (private testing)
-
-If you have HACS installed and your Home Assistant instance can access this GitHub repository (for example, via a personal access token or once the repo is made public):
-
-1. Make sure HACS is installed and working.
-2. In Home Assistant, go to **HACS → Integrations**.
-3. Click the three dots menu and choose **Custom repositories**.
-4. Add `https://github.com/levven-com/home-assistant-levven` as a repository of type **Integration**.
-5. Add the repository and close the dialog.
-6. Search for **Levven** under **HACS → Integrations**, install it, and restart Home Assistant.
+8. In Home Assistant, go to **Settings → Devices & Services → Add Integration**.
+9. Search for **Levven** and follow the setup instructions.
 
 > **Note**: HACS itself requires that the repository has this `README.md` at the **root** of the repo, plus `hacs.json` in the root, and the integration code under `custom_components/levven/`. The extra `README.md` under `custom_components/levven/` is optional and not used by HACS.
 
@@ -82,13 +49,13 @@ If you have HACS installed and your Home Assistant instance can access this GitH
 
 ### Prerequisites
 
-- A Levven Gateway connected to your network
-- An MQTT broker (Home Assistant's built-in Mosquitto add-on or external broker)
+- A Levven Q Gateway connected to your network
+- An MQTT broker, such as the Mosquitto broker provided through Home Assistant, or an external broker
 - The gateway must be configured to connect to the same MQTT broker
 
-#### Levven app MQTT configuration (recommended topics)
+#### Levven Controls app MQTT configuration (recommended topics)
 
-> A detailed step-by-step guide for configuring the Levven gateway in the app will be published here by Levven. In the meantime, follow the topic settings below and your Levven representative’s integration guide.
+A detailed step-by-step guide for configuring MQTT on the Levven Q Gateway will be added later. In the meantime, follow the topic settings below and your Levven representative’s integration guide.
 
 When configuring MQTT in the Levven app, you will be asked for **Presence Topic** (birth) and **Last Will Topic** (death).  
 The integration expects and subscribes to the following defaults:
@@ -113,13 +80,13 @@ The integration treats **any message** on the Presence Topic as “gateway onlin
 During setup you can also choose whether **Transmitters as entities** should be enabled:
 
 - When enabled, each newly discovered Levven switch (transmitter) will be added as an entity.
-- You can then attach automations to each button (up and down) using the `levven_switch_pressed` event and the per-transmitter state, giving fine-grained control per physical button. This does not affect any of the configuration within the Levven app so if you need to change swtich to controller mapping its recommended you do that in the Levven app.
+- You can then attach automations to each button (up and down) using the `levven_switch_pressed` event and the per-transmitter state, giving fine-grained control per physical button. This does not affect configuration in the Levven app. If you need to change switch-to-controller mapping, we recommend doing that in the Levven app.
 
-### Gateway and device presence (MQTT + mDNS fallback)
+### Levven Q Gateway and device presence (MQTT + mDNS fallback)
 
 Gateway availability is primarily tracked via **MQTT birth/death topics**, with **mDNS** used as a fallback:
 
-- When the Levven Gateway connects to MQTT it publishes to the Presence Topic (`levven/v1/notify/gateway/birth`), which the integration treats as “gateway online”.
+- When the Levven Q Gateway connects to MQTT it publishes to the Presence Topic (`levven/v1/notify/gateway/birth`), which the integration treats as “gateway online”.
 - When the gateway disconnects unexpectedly, the broker publishes the configured Last Will Topic (`levven/v1/notify/gateway/death`), which the integration treats as “gateway offline”.
 - Additionally, the gateway advertises itself on the local network via mDNS (`_lcap._tcp.local.`); the integration uses this as a secondary signal and fallback if MQTT presence is not configured.
 
@@ -135,7 +102,7 @@ For an overview of all Levven devices as well as detailed specifications and ima
 
 #### Dimmable Receivers (Light Entities)
 - **Type 4**: [GPDT15 – 1.5A Dimmer Power Controller](https://levven.com/shop/1-5a-dimmer-power-controller-90)
-- **Type 5**: [GPC20 – 20A On/Off Power Controller](https://levven.com/shop/20a-on-off-power-controller-91) (supports dimming in this integration)
+- **Type 5**: [GPC20 – 20A On/Off Power Controller](https://levven.com/shop/20a-on-off-power-controller-91)
 - **Type 13**: CP2-4-5 Channel 1 – configurable as dimmer or on/off (part of the [CP2-4D-5 3.5A Dual Output Power Controller](https://levven.com/shop/category/power-controllers-2)); see Configuration below
 
 #### On/Off Receivers (Switch Entities)
@@ -147,18 +114,13 @@ For an overview of all Levven devices as well as detailed specifications and ima
 
 Transmitters (switches) can be exposed as entities (if enabled during setup) and fire events when pressed:
 
-- **Type 2** (2019 families), for example:
+- **Type 2** (models made up to 2022), for example:
   - [CSDW – Decorator-Style Switch](https://levven.com/shop/csdw-79)
   - [CSQW – Designer-Style Switch](https://levven.com/shop/csqw-70)
   - [PSW – Portable-Style Switch](https://levven.com/shop/psw-99)
-- **Type 10** (2022 models): CSxyyH22 variants (designer-style switches with updated radio hardware)
-  - [GPDT15 – 1.5A Dimmer Power Controller](https://levven.com/shop/1-5a-dimmer-power-controller-90)
-  - [GPC10 – 10A On/Off Power Controller](https://levven.com/shop/10a-on-off-power-controller-77)
-  - [GPC20 – 20A On/Off Power Controller](https://levven.com/shop/20a-on-off-power-controller-91)
-  - [CP1-4 – 1.5A On/Off/Dimmer Power Controller](https://levven.com/shop/cp14d-111)
-  - [CSDW – Decorator-Style Switch](https://levven.com/shop/csdw-79)
-  - [CSQW – Designer-Style Switch](https://levven.com/shop/csqw-70)
-  - [PSW – Portable-Style Switch](https://levven.com/shop/psw-99)
+- **Type 10** (models made in 2022 and later): CSxyH22 variants (designer-style switches with updated radio hardware)
+  - [CSDWH22 – Decorator-Style Switch](https://levven.com/shop/csdw-79)
+  - [CSQWH22 – Designer-Style Switch](https://levven.com/shop/csqw-70)
 
 ## Entity Type Configuration
 
@@ -282,7 +244,7 @@ The integration uses the following MQTT topics (as defined in the gateway's MQTT
 - `levven/v1/notify/receiver/status` - Receiver availability (`reachable` flag used for HA availability)
 - `levven/v1/notify/transmitter/onoff` - Transmitter press events (used for `levven_switch_pressed` HA events)
 
-For correct operation, the gateway should be configured to publish **all** of the above notification topics to your MQTT broker.
+For full functionality, the gateway should be configured to publish **all** of the above notification topics to your MQTT broker.
 
 ### Brightness Mapping
 
@@ -299,7 +261,11 @@ The following features are not yet supported (require gateway firmware updates):
 - **Pairing Mode**: No service to initiate gateway pairing mode
 - **Transmitter Info**: No way to get transmitter names or details
 
-## Support
+## Support and Contributions
+
+This integration is provided as-is for use with Levven Electronics devices.
+
+Issues and pull requests are welcome, but this repository is maintained on a best-effort basis. Levven does not guarantee response times, support availability, or acceptance of proposed changes. For commercial support, contact Levven through normal support channels.
 
 For issues, feature requests, or questions:
 
@@ -329,5 +295,5 @@ You can also use the Home Assistant community forums for general “how do I…�
 
 ## License
 
-This integration is provided as-is for use with Levven devices.
+MIT License. See [LICENSE](LICENSE).
 
