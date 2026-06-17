@@ -45,12 +45,15 @@ If you have not previously installed the Home Assistant MQTT integration, follow
 1. Go to **Settings → Devices & Services → MQTT**.
 1. Click the three dots menu and select **Reconfigure**.
 
-   <img src=".github/images/MQTT_reconfig.png" alt="custom repo" width="600" style="border: 1px solid #888;">
+   <kbd>
+   <img src=".github/images/MQTT_reconfig.png" alt="custom repo" width="600" />
+   </kbd>
 
 1. Change user name from `homeassistant` to your login name and update password to your Home Assistant password. These will become your MQTT credentials. Then click **Submit**
 
-   <img src=".github/images/MQTT_broker.png" alt="custom repo" width="500" style="border: 1px solid #888;">
-
+   <kbd>
+   <img src=".github/images/MQTT_broker.png" alt="custom repo" width="500" />
+   </kbd>
 
 ### HACS
 
@@ -60,13 +63,15 @@ The Levven Home Assistant integration can be installed through HACS as a custom 
 
 1. Open HACS in Home Assistant (if not visible do a deep browser refresh).
 
-   <img src=".github/images/HACS_left_panel.png" alt="HACS in left panel" width="200" style="border: 1px solid #888;">
+   <kbd>
+   <img src=".github/images/HACS_left_panel.png" alt="HACS in left panel" width="200" />
+   </kbd>
 
 1. Click the three dots menu and select **Custom repositories**.
 
-  <kbd>
+   <kbd>
    <img src=".github/images/custom_repo.png" alt="custom repo" width="600" />
-  </kbd>
+   </kbd>
 
 1. Add this repository URL: `https://github.com/levven-com/home-assistant-levven`.
 1. Set the type to **Integration** and add.
@@ -81,25 +86,36 @@ The Levven Home Assistant integration can be installed through HACS as a custom 
 
 1. In your Levven mobile app select the gear icon in the upper right hand corner of the Levven mobile app to open the settings screen then tap **Integrations**
 
-   <img src=".github/images/Levven_settings.png" alt="custom repo" width="300" style="border: 1px solid #888;">
+   <kbd>
+   <img src=".github/images/Levven_settings.png" alt="custom repo" width="300" />
+   </kbd>
 
 1. If no integrations are configured your screen will look like the screen on the left. In which case tap **SETUP YOUR FIRST CONFIGURATION**. Otherwise tap the existing connection as shown on the right and continue to the next step.
 
-   <img src=".github/images/Levven_MQTT_config.png" alt="custom repo" width="300" style="border: 1px solid #888;">
-   <img src=".github/images/Levven_existing_MQTT_config.png" alt="custom repo" width="300" style="border: 1px solid #888;">
+   <kbd>
+   <img src=".github/images/Levven_MQTT_config.png" alt="custom repo" width="300" />
+   </kbd>
+   <kbd>
+   <img src=".github/images/Levven_existing_MQTT_config.png" alt="custom repo" width="300" />
+   </kbd>
 
 1. On the **MQTT Configuration** page be sure the that **Levven Universal MQTT** broker is selected. Give your connection a useful name such as **Home Assistant**. Enter your **Username** and **Password** as configured earlier in your **Home Assistant** configuration. Then expand **Advanced Settings**.
 
-   <img src=".github/images/Levven_new_MQTT_config.png" alt="custom repo" width="300" style="border: 1px solid #888;">
+   <kbd>
+   <img src=".github/images/Levven_new_MQTT_config.png" alt="custom repo" width="300" />
+   </kbd>
 
 1. Set the **URI** field to be `mqtt://homeassistant:1883`, unless you configured an external broker, in which case use a **URI** appropriate for your broker. Also update the **Last Will Topic** to be `levven/v1/notify/gateway/death` and the **Presence Topic** to be `levven/v1/notify/gateway/birth`. Then tap **Save**.
 
-   <img src=".github/images/Levven_advanced_MQTT_config.png" alt="custom repo" width="300" style="border: 1px solid #888;">
+   <kbd>
+   <img src=".github/images/Levven_advanced_MQTT_config.png" alt="custom repo" width="300" />
+   </kbd>
 
 1. Ensure that the integration is enabled. If the toggle symbol is pointing to the right that means it is disabled, in which case tap it so that it points to the left as in the image below.
 
-   <img src=".github/images/Levven_HA_MQTT_config.png" alt="custom repo" width="300" style="border: 1px solid #888;">
-
+   <kbd>
+   <img src=".github/images/Levven_HA_MQTT_config.png" alt="custom repo" width="300" />
+   </kbd>
 
 ### Home Assistant Levven Integration Setup
 
