@@ -7,7 +7,7 @@ Home Assistant integration for Levven devices connected through a Levven Q Gatew
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 [![GitHub stars](https://img.shields.io/github/stars/levven-com/home-assistant-levven)](https://github.com/levven-com/home-assistant-levven/stargazers)
 
-This integration enables Home Assistant to control and monitor Levven devices via the Levven Q Gateway using MQTT.
+This integration enables Home Assistant to control and monitor Levven devices via the [Levven Q Gateway](https://levven.com/shop/q-gateway-67) using MQTT.
 
 ## Features
 
@@ -20,67 +20,101 @@ This integration enables Home Assistant to control and monitor Levven devices vi
 
 ## Installation
 
-All integration code lives under `custom_components/levven/` in this repository.
+If you do not have a Home Assistant installation, follow the [Home Assistant installation guide](https://www.home-assistant.io/installation/) to set it up. This setup guide is based on the [Raspberry Pi Home Assistant installation](https://www.home-assistant.io/installation/raspberrypi).
+
+Install the Levven app on your mobile device.
+
+[![Download on the App Store](https://img.shields.io/badge/App_Store-0D96F6?style=for-the-badge&logo=app-store&logoColor=white)](https://apps.apple.com/ca/app/levven-controls/id1436898660)
+[![Get it on Google Play](https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.levven.controls)
 
 Before installing the integration in Home Assistant, it is **strongly recommended** that you:
 
-- Set up your Levven devices (gateway, power controllers, switches) in the Levven Controls app.
+- Set up your Levven devices (gateway, power controllers, switches) in the Levven app.
 - Give each device a meaningful name in the Levven app.
 
 While renaming is supported on the Home Assistant side, doing most of your naming in the Levven app first reduces the chance of name/ID churn that can affect automations and other features in Home Assistant.
 
+For additional information on installing and using your Levven Controls app to configure your Levven devices, see the [Levven Controls App Support page](https://levven.com/support/levven-controls-mobile-app).
+
+### Home Assistant MQTT integration
+
+If you have not previously installed the Home Assistant MQTT integration, follow the [Home Assistant MQTT guide](https://www.home-assistant.io/integrations/mqtt/).
+
+#### If using the Home Assistant provided Mosquitto broker additional configuration is required:
+
+1. Go to **Settings → Devices & Services → MQTT**.
+1. Click the three dots menu and select **Reconfigure**.
+
+   <img src=".github/images/MQTT_reconfig.png" alt="custom repo" width="600">
+
+1. Change user name from `homeassistant` to your login name and update password to your Home Assistant password. These will become your MQTT credentials. Then click **Submit**
+
+   <img src=".github/images/MQTT_broker.png" alt="custom repo" width="500">
+
+
 ### HACS
 
-This integration can be installed through HACS as a custom repository:
+If you have not previously installed the HACS Home Assistant integration, follow the [Start using HACS](https://hacs.xyz/docs/use/) guide on the HACS website. 
 
-1. Open HACS in Home Assistant.
-2. Go to **Integrations**.
-3. Click the three dots menu and select **Custom repositories**.
-4. Add this repository URL: `https://github.com/levven-com/home-assistant-levven`.
-5. Set the category to **Integration** and add.
-6. Search for **Levven** in HACS and install it.
-7. Restart Home Assistant.
-8. In Home Assistant, go to **Settings → Devices & Services → Add Integration**.
-9. Search for **Levven** and follow the setup instructions.
+The Levven Home Assistant integration can be installed through HACS as a custom repository:
 
-> **Note**: HACS itself requires that the repository has this `README.md` at the **root** of the repo, plus `hacs.json` in the root, and the integration code under `custom_components/levven/`. The extra `README.md` under `custom_components/levven/` is optional and not used by HACS.
+1. Open HACS in Home Assistant (if not visible do a deep browser refresh).
+
+   <img src=".github/images/HACS_left_panel.png" alt="HACS in left panel" width="200">
+   
+1. Click the three dots menu and select **Custom repositories**.
+
+   <img src=".github/images/custom_repo.png" alt="custom repo" width="600">
+   
+1. Add this repository URL: `https://github.com/levven-com/home-assistant-levven`.
+1. Set the type to **Integration** and add.
+1. Search for **Levven** in HACS, select it and click **Download** to install it.
+1. Restart Home Assistant.
+
+> **Note**: HACS itself requires that the repository has this `README.md` at the **root** of the repo, plus `hacs.json` in the root, and the integration code under `custom_components/levven/`
 
 ## Configuration
 
-### Prerequisites
+#### Levven app MQTT configuration
 
-- A Levven Q Gateway connected to your network
-- An MQTT broker, such as the Mosquitto broker provided through Home Assistant, or an external broker
-- The gateway must be configured to connect to the same MQTT broker
+1. In your Levven mobile app select the gear icon in the upper right hand corner of the Levven mobile app to open the settings screen then tap **Integrations**
 
-#### Levven Controls app MQTT configuration (recommended topics)
+   <img src=".github/images/Levven_settings.png" alt="custom repo" width="300">
 
-A detailed step-by-step guide for configuring MQTT on the Levven Q Gateway will be added later. In the meantime, follow the topic settings below and your Levven representative’s integration guide.
+1. If no integrations are configured your screen will look like the screen on the left. In which case tap **SETUP YOUR FIRST CONFIGURATION**. Otherwise tap the existing connection as shown on the right and continue to the next step.
 
-When configuring MQTT in the Levven app, you will be asked for **Presence Topic** (birth) and **Last Will Topic** (death).  
-The integration expects and subscribes to the following defaults:
+   <img src=".github/images/Levven_MQTT_config.png" alt="custom repo" width="300">
+   <img src=".github/images/Levven_existing_MQTT_config.png" alt="custom repo" width="300">
 
-- **Presence Topic (birth)**: `levven/v1/notify/gateway/birth`
-- **Last Will Topic (death)**: `levven/v1/notify/gateway/death`
+1. On the **MQTT Configuration** page be sure the that **Levven Universal MQTT** broker is selected. Give your connection a useful name such as **Home Assistant**. Enter your **Username** and **Password** as configured earlier in your **Home Assistant** configuration. Then expand **Advanced Settings**.
 
-The integration treats **any message** on the Presence Topic as “gateway online” and any message on the Last Will Topic as “gateway offline”; the payload is not inspected.
+   <img src=".github/images/Levven_new_MQTT_config.png" alt="custom repo" width="300">
 
-### Setup
+1. Set the **URI** field to be `mqtt://homeassistant:1883`, unless you configured an external broker, in which case use a **URI** appropriate for your broker. Also update the **Last Will Topic** to be `levven/v1/notify/gateway/death` and the **Presence Topic** to be `levven/v1/notify/gateway/birth`. Then tap **Save**.
 
-1. Go to **Settings → Devices & Services → Add Integration**.
-2. Search for **Levven**.
-3. Enter your MQTT broker details:
-   - **Host**: MQTT broker hostname or IP address
-   - **Port**: MQTT broker port (default: `1883`)
-   - **Username**: Optional (but **strongly recommended**) MQTT username
-   - **Password**: Optional (but **strongly recommended**) MQTT password
+   <img src=".github/images/Levven_advanced_MQTT_config.png" alt="custom repo" width="300">
+
+1. Ensure that the integration is enabled. If the toggle symbol is pointing to the right that means it is disabled, in which case tap it so that it points to the left as in the image below.
+
+   <img src=".github/images/Levven_HA_MQTT_config.png" alt="custom repo" width="300">
+
+
+### Home Assistant Levven Integration Setup
+
+1. In **Home Assistant** Go to **Settings → Devices & Services → Add Integration**.
+1. Search for **Levven**.
+1. Enter your MQTT broker details and then click **Submit**:
+   - **Host**: MQTT broker hostname or IP address (leave as `localhost` if using Home Assistant provided Mosquitto broker)
+   - **Port**: MQTT broker port (leave as `1883` if using Home Assistant provided Mosquitto broker)
+   - **Username**: Use same Username as configured in MQTT broker and Levven app.
+   - **Password**: Use same Password as configured in MQTT broker and Levven app.
    - **Use TLS**: Enable if your broker uses TLS
-4. The integration will automatically discover your gateway and all connected receivers.
+   - **Transmitters as entities**: When enabled, each newly discovered Levven switch (transmitter) will be added as an entity.
+      - You can then attach automations to each button (up and down) using the `levven_switch_pressed` event and the per-transmitter state, giving fine-grained control per physical button. This does not affect configuration in the Levven app. If you need to change switch-to-controller mapping, we recommend doing that in the Levven app.
 
-During setup you can also choose whether **Transmitters as entities** should be enabled:
+   <img src=".github/images/Levven_HA_config.png" alt="custom repo" width="500">
 
-- When enabled, each newly discovered Levven switch (transmitter) will be added as an entity.
-- You can then attach automations to each button (up and down) using the `levven_switch_pressed` event and the per-transmitter state, giving fine-grained control per physical button. This does not affect configuration in the Levven app. If you need to change switch-to-controller mapping, we recommend doing that in the Levven app.
+1. The integration will automatically discover your gateway and all connected receivers.
 
 ### Levven Q Gateway and device presence (MQTT + mDNS fallback)
 
@@ -296,4 +330,3 @@ You can also use the Home Assistant community forums for general “how do I…�
 ## License
 
 MIT License. See [LICENSE](LICENSE).
-
