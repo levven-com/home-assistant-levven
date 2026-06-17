@@ -394,10 +394,15 @@ Then:
 You can also use the Home Assistant community forums for general “how do I…” questions, but for bugs we strongly prefer GitHub issues with logs as above.
 ## Developer Notes
 
+You can also use the Home Assistant community forums for general “how do I…” questions, but for bugs we strongly prefer GitHub issues with logs as above.
+
+## Developer Notes
+
 HACS requires this repository structure:
 - `README.md` at the root
 - `hacs.json` at the root
 - Integration code under `custom_components/levven/`
+
 ## License
 
 MIT License. See [LICENSE](LICENSE).
