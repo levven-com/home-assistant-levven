@@ -61,11 +61,13 @@ The Levven Home Assistant integration can be installed through HACS as a custom 
 1. Open HACS in Home Assistant (if not visible do a deep browser refresh).
 
    <img src=".github/images/HACS_left_panel.png" alt="HACS in left panel" width="200" style="border: 1px solid #888;">
-   
+
 1. Click the three dots menu and select **Custom repositories**.
 
-   <img src=".github/images/custom_repo.png" alt="custom repo" width="600" style="border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
-   
+  <kbd>
+   <img src=".github/images/custom_repo.png" alt="custom repo" width="600" />
+  </kbd>
+
 1. Add this repository URL: `https://github.com/levven-com/home-assistant-levven`.
 1. Set the type to **Integration** and add.
 1. Search for **Levven** in HACS, select it and click **Download** to install it.
