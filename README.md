@@ -7,96 +7,191 @@ Home Assistant integration for Levven devices connected through a Levven Q Gatew
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 [![GitHub stars](https://img.shields.io/github/stars/levven-com/home-assistant-levven)](https://github.com/levven-com/home-assistant-levven/stargazers)
 
-This integration enables Home Assistant to control and monitor Levven devices via the Levven Q Gateway using MQTT.
+This integration enables Home Assistant to control and monitor Levven devices via the [Levven Q Gateway](https://levven.com/shop/q-gateway-67) using MQTT.
+
+## Table of Contents
+
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Supported Devices](#supported-devices)
+- [Usage](#usage)
+- [Device Discovery](#device-discovery)
+- [Troubleshooting](#troubleshooting)
+- [Technical Details](#technical-details)
+- [Limitations](#limitations)
+- [Support and Contributions](#support-and-contributions)
+- [Developer Notes](#developer-notes)
 
 ## Features
 
 - **Automatic Device Discovery**: Automatically discovers all receivers (controllers) connected to your Levven Q Gateway
-- **Light Control**: Full support for dimmable lights with brightness control (Levven level 0-65535 mapped to HA brightness 0-255)
+- **Light Control**: Full support for dimmable lights with brightness control
 - **Switch Control**: Support for on/off switches and outlets
 - **Real-time Updates**: State changes are reflected immediately via MQTT notifications
 - **Switch Events**: Transmitter (switch) presses trigger Home Assistant events for automation
 - **Device Management**: Automatic handling of device additions and removals
 
+## Prerequisites
+
+Before installing the integration, complete the following:
+
+### 1. Home Assistant
+
+If you do not have a Home Assistant installation, follow the [Home Assistant installation guide](https://www.home-assistant.io/installation/) to set it up.
+
+### 2. Levven Mobile App
+
+Install the Levven Controls app on your mobile device:
+
+[![Download on the App Store](https://img.shields.io/badge/App_Store-0D96F6?style=for-the-badge&logo=app-store&logoColor=white)](https://apps.apple.com/ca/app/levven-controls/id1436898660)
+[![Get it on Google Play](https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=com.levven.controls)
+
+**Before proceeding**, it is **strongly recommended** that you:
+
+- Set up your Levven devices (gateway, power controllers, switches) in the Levven app
+- Give each device a meaningful name in the Levven app
+
+While renaming is supported on the Home Assistant side, doing most of your naming in the Levven app first reduces the chance of name/ID churn that can affect automations.
+
+For additional information, see the [Levven Controls App Support page](https://levven.com/support/levven-controls-mobile-app).
+
+### 3. MQTT Broker
+
+If you have not previously installed the Home Assistant MQTT integration, follow the [Home Assistant MQTT guide](https://www.home-assistant.io/integrations/mqtt/).
+
+#### Mosquitto Broker Configuration
+
+If using the Home Assistant-provided Mosquitto broker, additional configuration is required:
+
+1. Go to **Settings → Devices & Services → MQTT**.
+
+2. Click the three-dot menu and select **Reconfigure**.
+
+   <kbd>
+   <img src=".github/images/MQTT_reconfig.png" alt="MQTT reconfigure menu" width="600" />
+   </kbd>
+
+3. Update your credentials:
+   - Change the username from `homeassistant` to your login name
+   - Update the password to your Home Assistant password
+
+   These will become your MQTT credentials. Click **Submit**.
+
+   <kbd>
+   <img src=".github/images/MQTT_broker.png" alt="MQTT broker settings" width="500" />
+   </kbd>
+
+### 4. HACS
+
+If you have not previously installed HACS, follow the [Start using HACS](https://hacs.xyz/docs/use/) guide.
+
 ## Installation
 
-All integration code lives under `custom_components/levven/` in this repository.
+The Levven integration can be installed through HACS as a custom repository:
 
-Before installing the integration in Home Assistant, it is **strongly recommended** that you:
+1. Open HACS in Home Assistant (if not visible, do a hard browser refresh).
 
-- Set up your Levven devices (gateway, power controllers, switches) in the Levven Controls app.
-- Give each device a meaningful name in the Levven app.
+   <kbd>
+   <img src=".github/images/HACS_left_panel.png" alt="HACS in left sidebar" width="200" />
+   </kbd>
 
-While renaming is supported on the Home Assistant side, doing most of your naming in the Levven app first reduces the chance of name/ID churn that can affect automations and other features in Home Assistant.
+2. Click the three-dot menu and select **Custom repositories**.
 
-### HACS
+   <kbd>
+   <img src=".github/images/custom_repo.png" alt="HACS custom repositories menu" width="600" />
+   </kbd>
 
-This integration can be installed through HACS as a custom repository:
+3. Add the repository:
+   - **URL**: `https://github.com/levven-com/home-assistant-levven`
+   - **Type**: Integration
 
-1. Open HACS in Home Assistant.
-2. Go to **Integrations**.
-3. Click the three dots menu and select **Custom repositories**.
-4. Add this repository URL: `https://github.com/levven-com/home-assistant-levven`.
-5. Set the category to **Integration** and add.
-6. Search for **Levven** in HACS and install it.
-7. Restart Home Assistant.
-8. In Home Assistant, go to **Settings → Devices & Services → Add Integration**.
-9. Search for **Levven** and follow the setup instructions.
+4. Search for **Levven** in HACS, select it, and click **Download**.
 
-> **Note**: HACS itself requires that the repository has this `README.md` at the **root** of the repo, plus `hacs.json` in the root, and the integration code under `custom_components/levven/`. The extra `README.md` under `custom_components/levven/` is optional and not used by HACS.
+5. Restart Home Assistant.
 
 ## Configuration
 
-### Prerequisites
+### Levven App MQTT Settings
 
-- A Levven Q Gateway connected to your network
-- An MQTT broker, such as the Mosquitto broker provided through Home Assistant, or an external broker
-- The gateway must be configured to connect to the same MQTT broker
+1. In the Levven app, tap the gear icon (upper right) to open settings, then tap **Integrations**.
 
-#### Levven Controls app MQTT configuration (recommended topics)
+   <kbd>
+   <img src=".github/images/Levven_settings.png" alt="Levven app settings screen" width="300" />
+   </kbd>
 
-A detailed step-by-step guide for configuring MQTT on the Levven Q Gateway will be added later. In the meantime, follow the topic settings below and your Levven representative’s integration guide.
+2. Set up your integration:
+   - If no integrations exist, tap **SETUP YOUR FIRST CONFIGURATION**
+   - If one exists, tap it to edit
 
-When configuring MQTT in the Levven app, you will be asked for **Presence Topic** (birth) and **Last Will Topic** (death).  
-The integration expects and subscribes to the following defaults:
+   <kbd>
+   <img src=".github/images/Levven_MQTT_config.png" alt="Levven MQTT setup screen" width="300" />
+   </kbd>
+   <kbd>
+   <img src=".github/images/Levven_existing_MQTT_config.png" alt="Levven existing MQTT configuration" width="300" />
+   </kbd>
 
-- **Presence Topic (birth)**: `levven/v1/notify/gateway/birth`
-- **Last Will Topic (death)**: `levven/v1/notify/gateway/death`
+3. Configure the MQTT connection:
+   - Select **Levven Universal MQTT** as the broker
+   - Enter a name (e.g., "Home Assistant")
+   - Enter your **Username** and **Password** (same as configured in MQTT broker)
+   - Tap **Advanced Settings** to expand
 
-The integration treats **any message** on the Presence Topic as “gateway online” and any message on the Last Will Topic as “gateway offline”; the payload is not inspected.
+   <kbd>
+   <img src=".github/images/Levven_new_MQTT_config.png" alt="Levven MQTT configuration form" width="300" />
+   </kbd>
 
-### Setup
+4. Configure advanced settings:
+   - **URI**: `mqtt://homeassistant:1883` (or your broker's address)
+   - **Last Will Topic**: `levven/v1/notify/gateway/death`
+   - **Presence Topic**: `levven/v1/notify/gateway/birth`
+
+   Tap **Save**.
+
+   <kbd>
+   <img src=".github/images/Levven_advanced_MQTT_config.png" alt="Levven advanced MQTT settings" width="300" />
+   </kbd>
+
+5. Ensure the integration is enabled (toggle should point left).
+
+   <kbd>
+   <img src=".github/images/Levven_HA_MQTT_config.png" alt="Levven integration toggle enabled" width="300" />
+   </kbd>
+
+### Home Assistant Integration Setup
 
 1. Go to **Settings → Devices & Services → Add Integration**.
+
 2. Search for **Levven**.
+
 3. Enter your MQTT broker details:
-   - **Host**: MQTT broker hostname or IP address
-   - **Port**: MQTT broker port (default: `1883`)
-   - **Username**: Optional (but **strongly recommended**) MQTT username
-   - **Password**: Optional (but **strongly recommended**) MQTT password
+   - **Host**: Broker hostname or IP (use `localhost` for Mosquitto add-on)
+   - **Port**: Broker port (default `1883`)
+   - **Username**: Same as configured in MQTT broker and Levven app
+   - **Password**: Same as configured in MQTT broker and Levven app
    - **Use TLS**: Enable if your broker uses TLS
-4. The integration will automatically discover your gateway and all connected receivers.
+   - **Transmitters as entities**: Enable to expose physical switches as entities for automations
 
-During setup you can also choose whether **Transmitters as entities** should be enabled:
+   <kbd>
+   <img src=".github/images/Levven_HA_config.png" alt="Home Assistant Levven integration setup" width="500" />
+   </kbd>
 
-- When enabled, each newly discovered Levven switch (transmitter) will be added as an entity.
-- You can then attach automations to each button (up and down) using the `levven_switch_pressed` event and the per-transmitter state, giving fine-grained control per physical button. This does not affect configuration in the Levven app. If you need to change switch-to-controller mapping, we recommend doing that in the Levven app.
+4. Click **Submit**. The integration will automatically discover your gateway and connected receivers.
 
-### Levven Q Gateway and device presence (MQTT + mDNS fallback)
+### Gateway Presence Detection
 
-Gateway availability is primarily tracked via **MQTT birth/death topics**, with **mDNS** used as a fallback:
+Gateway availability is tracked via **MQTT birth/death topics**, with **mDNS** as a fallback:
 
-- When the Levven Q Gateway connects to MQTT it publishes to the Presence Topic (`levven/v1/notify/gateway/birth`), which the integration treats as “gateway online”.
-- When the gateway disconnects unexpectedly, the broker publishes the configured Last Will Topic (`levven/v1/notify/gateway/death`), which the integration treats as “gateway offline”.
-- Additionally, the gateway advertises itself on the local network via mDNS (`_lcap._tcp.local.`); the integration uses this as a secondary signal and fallback if MQTT presence is not configured.
+- **Online**: Gateway publishes to `levven/v1/notify/gateway/birth`
+- **Offline**: Broker publishes `levven/v1/notify/gateway/death` (Last Will)
+- **Fallback**: Gateway advertises via mDNS (`_lcap._tcp.local.`)
 
-Per-device reachability is tracked via MQTT:
-
-- The integration subscribes to `levven/v1/notify/receiver/status` and uses the `reachable` flag in that payload to mark each receiver as available/unavailable.
+Per-device reachability uses the `reachable` flag from `levven/v1/notify/receiver/status`.
 
 ## Supported Devices
 
-For an overview of all Levven devices as well as detailed specifications and images of each supported device, refer to the [Levven shop](https://levven.com/shop), such as:
+For an overview of all Levven devices, refer to the [Levven shop](https://levven.com/shop).
 
 ### Receivers (Controllers)
 
@@ -221,6 +316,9 @@ Devices are automatically removed when:
 
 ## Technical Details
 
+<details>
+<summary>Click to expand MQTT topics and technical information</summary>
+
 ### MQTT Topics
 
 The integration uses the following MQTT topics (as defined in the gateway's MQTT-RPC bridge):
@@ -251,6 +349,8 @@ For full functionality, the gateway should be configured to publish **all** of t
 Levven devices use a 0-65535 scale for brightness, while Home Assistant uses 0-255. The integration automatically converts between these scales:
 - Levven 0-65535 → HA 0-255
 - HA 0-255 → Levven 0-65535
+
+</details>
 
 ## Limitations
 
@@ -292,8 +392,17 @@ Then:
    - Screenshots of the **Levven app configuration**, **Home Assistant integration setup screen**, and any failing entities or automations, if applicable.
 
 You can also use the Home Assistant community forums for general “how do I…” questions, but for bugs we strongly prefer GitHub issues with logs as above.
+## Developer Notes
+
+You can also use the Home Assistant community forums for general “how do I…” questions, but for bugs we strongly prefer GitHub issues with logs as above.
+
+## Developer Notes
+
+HACS requires this repository structure:
+- `README.md` at the root
+- `hacs.json` at the root
+- Integration code under `custom_components/levven/`
 
 ## License
 
 MIT License. See [LICENSE](LICENSE).
-
