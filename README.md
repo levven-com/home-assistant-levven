@@ -70,7 +70,7 @@ If using the Home Assistant-provided Mosquitto broker, additional configuration 
 2. Click the three-dot menu and select **Reconfigure**.
 
    <kbd>
-   <img src="https://github.com/levven-com/home-assistant-levven/blob/main/https://github.com/levven-com/home-assistant-levven/blob/main/.github/images/MQTT_reconfig.png" alt="MQTT reconfigure menu" width="600" />
+   <img src="https://github.com/levven-com/home-assistant-levven/blob/main/.github/images/MQTT_reconfig.png" alt="MQTT reconfigure menu" width="600" />
    </kbd>
 
 3. Update your credentials:
