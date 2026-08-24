@@ -779,21 +779,18 @@ class LevvenDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]
         )
 
         if wait_response:
-            # Wait for response
             try:
                 await asyncio.wait_for(response_event.wait(), timeout=timeout)
             except asyncio.TimeoutError:
                 _LOGGER.warning("Timeout waiting for response to %s", topic)
                 return None
             finally:
-                # Clean up
-                if correlation_id in self._pending_requests:
-                    del self._pending_requests[correlation_id]
-                if correlation_id in self._pending_responses:
-                    response = self._pending_responses.pop(correlation_id)
-                    # Unsubscribe from response topic
-                    unsubscribe_response()
-                    return response
+                # Clean up regardless of outcome
+                self._pending_requests.pop(correlation_id, None)
+                unsubscribe_response()
+
+            # Only reached if wait_for succeeded (no exception)
+            return self._pending_responses.pop(correlation_id, None)
 
         return None
 
