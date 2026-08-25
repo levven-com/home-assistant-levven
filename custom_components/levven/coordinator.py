@@ -114,6 +114,12 @@ class LevvenDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]
         self._gateway_available: bool = True  # assume available until presence says otherwise
         self._mdns_services: set[str] = set()  # service names that reported our gwid
         self._mdns_browser: ServiceBrowser | None = None
+        # True once a receiver-list RPC has gotten a valid response. The initial discovery at
+        # startup can race the gateway/broker still reconnecting after a reboot and time out with
+        # no devices; when that happens we retry as soon as presence (birth/mDNS) confirms the
+        # gateway is actually online, instead of requiring a manual reload.
+        self._devices_discovered: bool = False
+        self._discovery_retry_lock = asyncio.Lock()
 
     @property
     def gateway_available(self) -> bool:
@@ -164,6 +170,7 @@ class LevvenDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]
                 self._gateway_available = True
                 _LOGGER.info("Gateway %s seen on network (mDNS)", self.gwid)
             self.async_update_listeners()
+            await self._async_retry_discovery_if_needed()
         except Exception as err:  # pylint: disable=broad-except
             _LOGGER.debug("mDNS resolve for %s: %s", name, err)
 
@@ -301,6 +308,7 @@ class LevvenDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]
             _LOGGER.info("Gateway %s marked online from MQTT presence (birth topic)", self.gwid)
         self._gateway_available = True
         self.async_update_listeners()
+        self.hass.async_create_task(self._async_retry_discovery_if_needed())
 
     @callback
     def _handle_gateway_death(self, payload: dict[str, Any]) -> None:
@@ -652,9 +660,34 @@ class LevvenDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]
             for uid in uids:
                 await self._async_discover_device(uid)
 
+            self._devices_discovered = True
+
         except Exception as err:  # pylint: disable=broad-except
             _LOGGER.exception("Error during device discovery: %s", err)
             raise UpdateFailed(f"Error discovering devices: {err}") from err
+
+    async def _async_retry_discovery_if_needed(self) -> None:
+        """Retry receiver discovery if it hasn't succeeded yet.
+
+        The initial discovery in async_setup() can run before the gateway has finished
+        reconnecting to the broker after a reboot, in which case the RPC simply times out and no
+        devices are found. This is called whenever gateway presence (MQTT birth or mDNS) confirms
+        the gateway is actually online, so devices show up without requiring a manual reload.
+        """
+        if self._devices_discovered or self._discovery_retry_lock.locked():
+            return
+        async with self._discovery_retry_lock:
+            if self._devices_discovered:
+                return
+            _LOGGER.info("Gateway %s now confirmed online; retrying device discovery", self.gwid)
+            try:
+                await self.async_discover_devices()
+            except Exception as err:  # pylint: disable=broad-except
+                _LOGGER.debug(
+                    "Retry device discovery for %s failed, will retry on next presence signal: %s",
+                    self.gwid,
+                    err,
+                )
 
     async def _async_discover_device(self, uid: str, response: dict[str, Any] | None = None) -> None:
         """Discover a single device. If response is provided, use it; otherwise request via RPC."""

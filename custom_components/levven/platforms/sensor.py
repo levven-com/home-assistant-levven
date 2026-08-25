@@ -10,7 +10,6 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from ..const import DEVICE_TYPE_TO_MODEL, DOMAIN
@@ -28,7 +27,7 @@ def _register_transmitter_listener(
 ) -> None:
     """Register a listener so we add entities when new transmitters appear from MQTT."""
 
-    added_uids: set[str] = set()
+    added_uids: set[str] = set()  # tracks uids added *this session*; entity registry persists across restarts so it can't be used for this
 
     @callback
     def _add_new_transmitters() -> None:
@@ -36,15 +35,10 @@ def _register_transmitter_listener(
         if hass.config_entries.async_get_entry(config_entry.entry_id) is None:
             return
         devices = coordinator.get_devices_by_type("transmitter")
-        entity_reg = er.async_get(hass)
         new_entities = []
         for device in devices:
             uid = device["uid"]
             if uid in added_uids:
-                continue
-            unique_id = f"levven_{coordinator.gwid}_tx_{uid}"
-            if entity_reg.async_get_entity_id("sensor", DOMAIN, unique_id):
-                added_uids.add(uid)
                 continue
             added_uids.add(uid)
             new_entities.append(LevvenTransmitterSensor(coordinator, device))
