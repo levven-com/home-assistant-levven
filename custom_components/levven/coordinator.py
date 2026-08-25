@@ -117,9 +117,13 @@ class LevvenDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]
         # True once a receiver-list RPC has gotten a valid response. The initial discovery at
         # startup can race the gateway/broker still reconnecting after a reboot and time out with
         # no devices; when that happens we retry as soon as presence (birth/mDNS) confirms the
-        # gateway is actually online, instead of requiring a manual reload.
+        # gateway is actually online, instead of requiring a manual reload. We also fall back to
+        # a background retry loop (see _async_discovery_retry_loop) since the gateway itself may
+        # never go offline/online (only HA's own MQTT client is reconnecting), so no presence
+        # event fires at all in that case.
         self._devices_discovered: bool = False
         self._discovery_retry_lock = asyncio.Lock()
+        self._discovery_retry_task: asyncio.Task | None = None
 
     @property
     def gateway_available(self) -> bool:
@@ -136,6 +140,14 @@ class LevvenDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]
 
         # Perform initial device discovery
         await self.async_discover_devices()
+
+        # If that didn't find anything, keep retrying in the background instead of requiring a
+        # manual reload (e.g. HA's own MQTT client may still be reconnecting to the broker at
+        # this point, even though the gateway itself never went offline).
+        if not self._devices_discovered:
+            self._discovery_retry_task = self.hass.async_create_task(
+                self._async_discovery_retry_loop()
+            )
 
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
         """Return current device state for coordinator refresh. Data is updated via MQTT notifications."""
@@ -186,6 +198,9 @@ class LevvenDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]
 
     def async_stop(self) -> None:
         """Stop mDNS browser and cancel transmitter reset timers when config entry is unloaded."""
+        if self._discovery_retry_task is not None:
+            self._discovery_retry_task.cancel()
+            self._discovery_retry_task = None
         for handle in self._transmitter_reset_handles.values():
             try:
                 handle.cancel()
@@ -688,6 +703,39 @@ class LevvenDataUpdateCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]
                     self.gwid,
                     err,
                 )
+
+    async def _async_discovery_retry_loop(self) -> None:
+        """Keep retrying discovery on a backoff until it succeeds.
+
+        Presence events (birth/mDNS) only fire when the gateway itself goes offline/online, so
+        they don't help when the gateway never lost connectivity and it's only HA's own MQTT
+        client reconnecting to the broker after a restart. This loop is the fallback that covers
+        that case: it just keeps trying the RPC until it actually gets through, so devices show up
+        on their own without a manual reload.
+        """
+        delay = 5.0
+        max_delay = 60.0
+        try:
+            while not self._devices_discovered:
+                await asyncio.sleep(delay)
+                if self._devices_discovered or self._discovery_retry_lock.locked():
+                    continue
+                async with self._discovery_retry_lock:
+                    if self._devices_discovered:
+                        return
+                    _LOGGER.info(
+                        "Retrying device discovery for gateway %s (no devices found yet)",
+                        self.gwid,
+                    )
+                    try:
+                        await self.async_discover_devices()
+                    except Exception as err:  # pylint: disable=broad-except
+                        _LOGGER.debug(
+                            "Retry device discovery for %s failed: %s", self.gwid, err
+                        )
+                delay = min(delay * 2, max_delay)
+        except asyncio.CancelledError:
+            pass
 
     async def _async_discover_device(self, uid: str, response: dict[str, Any] | None = None) -> None:
         """Discover a single device. If response is provided, use it; otherwise request via RPC."""
