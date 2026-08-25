@@ -9,7 +9,6 @@ from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
-from homeassistant.helpers.entity_registry import async_get as async_get_entity_registry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -31,19 +30,19 @@ def _register_receiver_listener(
 ) -> None:
     """Register a listener so we add switch entities when new receivers appear from MQTT (same as transmitters)."""
     _pending: list = []  # [TimerHandle] for debounce
+    added_uids: set[str] = set()  # tracks uids added *this session*; entity registry persists across restarts so it can't be used for this
 
     @callback
     def _add_new_switches() -> None:
         if hass.config_entries.async_get_entry(config_entry.entry_id) is None:
             return
         devices = coordinator.get_devices_by_type("switch")
-        entity_reg = async_get_entity_registry(hass)
         new_entities = []
         for device in devices:
             uid = device["uid"]
-            unique_id = f"levven_{coordinator.gwid}_{uid}"
-            if entity_reg.async_get_entity_id("switch", DOMAIN, unique_id):
+            if uid in added_uids:
                 continue
+            added_uids.add(uid)
             new_entities.append(LevvenSwitch(coordinator, device))
         if new_entities:
             async_add_entities(new_entities)
