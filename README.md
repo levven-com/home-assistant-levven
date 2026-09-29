@@ -1,13 +1,16 @@
 # Levven Home Assistant Integration
 
-Home Assistant integration for Levven devices connected through a Levven Q Gateway, maintained in the `levven-com/home-assistant-levven` repository (developed by `@jvsinclair`).
+Home Assistant integration for Levven devices connected through a Levven LCQ2M Gateway, maintained in the `levven-com/home-assistant-levven` repository (developed by `@jvsinclair`).
 
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
 [![GitHub release](https://img.shields.io/github/v/release/levven-com/home-assistant-levven)](https://github.com/levven-com/home-assistant-levven/releases)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 [![GitHub stars](https://img.shields.io/github/stars/levven-com/home-assistant-levven)](https://github.com/levven-com/home-assistant-levven/stargazers)
 
-This integration enables Home Assistant to control and monitor Levven devices via the [Levven Q Gateway](https://levven.com/shop/q-gateway-67) using MQTT.
+This integration enables Home Assistant to control and monitor Levven devices via the [Levven LCQ2M Gateway](https://levven.com/shop/q-gateway-67) using MQTT. It is not compatible with the LCQ2 Gateway
+
+> [!IMPORTANT]
+> This plugin requires the LCQ2M gateway. The LCQ2 gateway does not support MQTT.
 
 ## Table of Contents
 
